@@ -26,17 +26,38 @@ class UserTaxiCallsController < ApplicationController
   # POST /user_taxi_calls.json
   def create
     call_params = user_taxi_call_params
-    puts call_params
+
+    previous_call = UserTaxiCall.where(user_id: call_params.user_id, pending: true).first
     @user_taxi_call = UserTaxiCall.new(call_params)
 
-    respond_to do |format|
-      if @user_taxi_call.save
-        format.html { redirect_to @user_taxi_call, notice: 'User taxi call was successfully created.' }
-        # format.json { render :show, status: :created, location: @user_taxi_call }
-        format.json { render :show, status: :created, location: @user_taxi_call }
-      else
-        format.html { render :new }
-        format.json { render json: @user_taxi_call.errors, status: :unprocessable_entity }
+    if(previous_call.nil?)
+
+      respond_to do |format|
+        if @user_taxi_call.save!
+          notification = Rpush::Gcm::Notification.new
+          taxi_user = Taxi.find(call_params.taxi_id).user
+          client_user = User.find(call_params.user_id)
+          regid = taxi_user.registration_id
+
+          if(!regid.nil?)
+            notification.app = Rpush::Gcm::App.find_by_name("Taxi Tapp GCM")
+            notification.registration_ids = [regid]
+
+            notification.data = {
+              message: client_user.get_full_name + " is looking for a cab!"
+              call_id: @user_taxi_call.id
+            }
+
+            notification.save!
+            Rpush.push
+          end
+
+          format.html { redirect_to @user_taxi_call, notice: 'User taxi call was successfully created.' }
+          format.json { render :show, status: :created, location: @user_taxi_call }
+        else
+          format.html { render :new }
+          format.json { render json: @user_taxi_call.errors, status: :unprocessable_entity }
+        end
       end
     end
   end
@@ -46,6 +67,27 @@ class UserTaxiCallsController < ApplicationController
   def update
     respond_to do |format|
       if @user_taxi_call.update(user_taxi_call_params)
+
+        if(!@user_taxi_call.pending)
+          notification = Rpush::Gcm::Notification.new
+          taxi_user = Taxi.find(@user_taxi_call.taxi_id).user
+          client_user = User.find(@user_taxi_call.user_id)
+          regid = client_user.registration_id
+
+          if(!regid.nil?)
+            notification.app = Rpush::Gcm::App.find_by_name("Taxi Tapp GCM")
+            notification.registration_ids = [regid]
+
+            notification.data = {
+              message: taxi_user.get_full_name + " is on the way to pick you up!"
+              call_id: @user_taxi_call.id
+            }
+
+            notification.save!
+            Rpush.push
+          end
+        end
+
         format.html { redirect_to @user_taxi_call, notice: 'User taxi call was successfully updated.' }
         format.json { render :show, status: :ok, location: @user_taxi_call }
       else

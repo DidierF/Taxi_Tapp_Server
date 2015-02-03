@@ -5,10 +5,7 @@ class TaxisController < ApplicationController
   # GET /taxis
   # GET /taxis.json
   def index
-    @taxis = Taxi.where(available: true)
-    puts @taxis.first
-    puts @taxis.first.to_json
-    @taxis
+    @taxis = Taxi.where(available: true).where.not(registration_id: nil)
   end
 
   # GET /taxis/1
