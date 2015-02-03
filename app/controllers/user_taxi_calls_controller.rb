@@ -39,7 +39,7 @@ class UserTaxiCallsController < ApplicationController
           client_user = User.find(call_params.user_id)
           regid = taxi_user.registration_id
 
-          if(!regid.nil?)
+          if !regid.nil?
             notification.app = Rpush::Gcm::App.find_by_name("Taxi Tapp GCM")
             notification.registration_ids = [regid]
 
@@ -68,13 +68,13 @@ class UserTaxiCallsController < ApplicationController
     respond_to do |format|
       if @user_taxi_call.update(user_taxi_call_params)
 
-        if(!@user_taxi_call.pending)
+        if !@user_taxi_call.pending
           notification = Rpush::Gcm::Notification.new
           taxi_user = Taxi.find(@user_taxi_call.taxi_id).user
           client_user = User.find(@user_taxi_call.user_id)
           regid = client_user.registration_id
 
-          if(!regid.nil?)
+          if !regid.nil?
             notification.app = Rpush::Gcm::App.find_by_name("Taxi Tapp GCM")
             notification.registration_ids = [regid]
 
