@@ -10,14 +10,14 @@ default: &default
   timeout: 5000
 
 heroku_settings: &heroku_conf
-	adapter: postgresql
-	database: taxi_tapp_production
-    pool: 5
-	timeout: 5000
+  adapter: postgresql
+  pool: 5
+  timeout: 5000
 
 development:
   <<: *heroku_conf
   # database: db/development.sqlite3
+  database: taxi_tapp_development
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -25,7 +25,9 @@ development:
 test:
   <<: *heroku_conf
   # database: db/test.sqlite3
+  database: taxi_tapp_test
 
 production:
   <<: *heroku_conf
   # database: db/production.sqlite3
+  database: taxi_tapp_production
