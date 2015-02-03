@@ -54,7 +54,7 @@ users.each { |u|
 	record.save!
 	if(record.id > 2)
 		taxi = Taxi.new
-		taxi.name = record.name
+		taxi.name = record.full_name
 		taxi.available = true
 		taxi.latitude = record.latitude
 		taxi.longitude = record.longitude
