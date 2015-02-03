@@ -6,11 +6,13 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
-gcmApp = { 
+gcmAppParams = { 
 		name: "Taxi Tapp GCM",
 		connections: 1,
 		auth_key: "AIzaSyBndHXXnl7L0P8H4LpVGATPNwMDNXE1viQ"
 	}
+
+gcmApp = Rpush::Gcm::App::new(gcmAppParams)
 gcmApp.save!
 
 user1 = {
