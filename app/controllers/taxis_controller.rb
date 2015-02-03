@@ -5,7 +5,9 @@ class TaxisController < ApplicationController
   # GET /taxis
   # GET /taxis.json
   def index
-    @taxis = Taxi.where(available: true).where.not(registration_id: nil)
+    @taxis = Taxi.where(available: true).to_a.delete_if { |t|
+      t.user.registration_id.nil?
+    }
   end
 
   # GET /taxis/1
