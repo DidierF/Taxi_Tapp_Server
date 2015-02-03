@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  resources :user_taxi_calls
+
+  resources :users
+
   resources :taxis
 
   # The priority is based upon order of creation: first created -> highest priority.

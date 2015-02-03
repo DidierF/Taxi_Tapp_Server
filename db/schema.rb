@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150120160704) do
+ActiveRecord::Schema.define(version: 20150129060527) do
 
   create_table "rpush_apps", force: :cascade do |t|
     t.string   "name",                                null: false
@@ -80,6 +80,29 @@ ActiveRecord::Schema.define(version: 20150120160704) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean  "available"
+    t.integer  "user_id"
+  end
+
+  create_table "user_taxi_calls", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "taxi_id"
+    t.boolean  "direct_call"
+    t.boolean  "pending"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.float    "latitude"
+    t.float    "longitude"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string   "username"
+    t.string   "first_name"
+    t.string   "last_name"
+    t.float    "latitude"
+    t.float    "longitude"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+    t.string   "registration_id"
   end
 
 end

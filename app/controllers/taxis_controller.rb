@@ -1,11 +1,14 @@
 class TaxisController < ApplicationController
   before_action :set_taxi, only: [:show, :edit, :update, :destroy]
-  skip_before_filter :verify_authenticity_token  
+  skip_before_filter :verify_authenticity_token
 
   # GET /taxis
   # GET /taxis.json
   def index
     @taxis = Taxi.where(available: true)
+    puts @taxis.first
+    puts @taxis.first.to_json
+    @taxis
   end
 
   # GET /taxis/1
