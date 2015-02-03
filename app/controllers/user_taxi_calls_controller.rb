@@ -79,7 +79,7 @@ class UserTaxiCallsController < ApplicationController
             notification.registration_ids = [regid]
 
             notification.data = {
-              message: taxi_user.get_full_name + " is on the way to pick you up!"
+              message: taxi_user.get_full_name + " is on the way to pick you up!",
               call_id: @user_taxi_call.id
             }
 
