@@ -27,7 +27,7 @@ class UserTaxiCallsController < ApplicationController
   def create
     call_params = user_taxi_call_params
 
-    previous_call = UserTaxiCall.where(user_id: call_params.user_id, pending: true).first
+    previous_call = UserTaxiCall.where(user_id: call_params[:user_id], pending: true).first
     @user_taxi_call = UserTaxiCall.new(call_params)
 
     if(previous_call.nil?)
@@ -35,8 +35,8 @@ class UserTaxiCallsController < ApplicationController
       respond_to do |format|
         if @user_taxi_call.save!
           notification = Rpush::Gcm::Notification.new
-          taxi_user = Taxi.find(call_params.taxi_id).user
-          client_user = User.find(call_params.user_id)
+          taxi_user = Taxi.find(call_params[:taxi_id]).user
+          client_user = User.find(call_params[:user_id])
           regid = taxi_user.registration_id
 
           if !regid.nil?
@@ -115,8 +115,8 @@ class UserTaxiCallsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def user_taxi_call_params
-      call_params = params.require(:user_taxi_call)[0]
-      call_params = call_params.each { |k, v| call_params[k] = v[0] }
+      call_params = params.require(:user_taxi_call)[0] || params.require(:user_taxi_call)
+      call_params = call_params.each { |k, v| call_params[k] = v[0] ? v[0] : v }
 
       call_params.permit(:user_id, :taxi_id, :latitude, :longitude)
     end
