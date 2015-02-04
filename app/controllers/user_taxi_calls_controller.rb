@@ -27,37 +27,35 @@ class UserTaxiCallsController < ApplicationController
   def create
     call_params = user_taxi_call_params
 
-    previous_call = UserTaxiCall.where(user_id: call_params.user_id, pending: true).first
+    previous_call = UserTaxiCall.where(user_id: call_params[:user_id], pending: true).first
     @user_taxi_call = UserTaxiCall.new(call_params)
 
-    if(previous_call.nil?)
 
-      respond_to do |format|
-        if @user_taxi_call.save!
-          notification = Rpush::Gcm::Notification.new
-          taxi_user = Taxi.find(call_params.taxi_id).user
-          client_user = User.find(call_params.user_id)
-          regid = taxi_user.registration_id
+    respond_to do |format|
+      if previous_call.nil? && @user_taxi_call.save!
+        notification = Rpush::Gcm::Notification.new
+        taxi_user = Taxi.find(call_params[:taxi_id]).user
+        client_user = User.find(call_params[:user_id])
+        regid = taxi_user.registration_id
 
-          if !regid.nil?
-            notification.app = Rpush::Gcm::App.find_by_name("Taxi Tapp GCM")
-            notification.registration_ids = [regid]
+        if !regid.nil?
+          notification.app = Rpush::Gcm::App.find_by_name("Taxi Tapp GCM")
+          notification.registration_ids = [regid]
 
-            notification.data = {
-              message: client_user.get_full_name + " is looking for a cab!",
-              call_id: @user_taxi_call.id
-            }
+          notification.data = {
+            message: client_user.get_full_name + " is looking for a cab!",
+            call_id: @user_taxi_call.id
+          }
 
-            notification.save!
-            Rpush.push
-          end
-
-          format.html { redirect_to @user_taxi_call, notice: 'User taxi call was successfully created.' }
-          format.json { render :show, status: :created, location: @user_taxi_call }
-        else
-          format.html { render :new }
-          format.json { render json: @user_taxi_call.errors, status: :unprocessable_entity }
+          notification.save!
+          Rpush.push
         end
+
+        format.html { redirect_to @user_taxi_call, notice: 'User taxi call was successfully created.' }
+        format.json { render :show, status: :created, location: @user_taxi_call }
+      else
+        format.html { render :new }
+        format.json { render json: @user_taxi_call.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -115,8 +113,13 @@ class UserTaxiCallsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def user_taxi_call_params
-      call_params = params.require(:user_taxi_call)[0]
+      call_params = params.require(:user_taxi_call)[0] || params.require(:user_taxi_call)
+      puts "test"
+      puts call_params
+
       call_params = call_params.each { |k, v| call_params[k] = v[0] }
+
+      puts call_params
 
       call_params.permit(:user_id, :taxi_id, :latitude, :longitude)
     end
