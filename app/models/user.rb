@@ -8,6 +8,10 @@ class User < ActiveRecord::Base
 		self.first_name + ' ' + self.last_name
 	end
 
+	def get_full_name
+		self.getFullName
+	end
+
 	def full_name
 		self.getFullName
 	end

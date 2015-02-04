@@ -38,8 +38,6 @@ class UserTaxiCallsController < ApplicationController
         client_user = User.find(call_params[:user_id])
         regid = taxi_user.registration_id
 
-        puts "Before regid check"
-
         if !regid.nil?
           notification.app = Rpush::Gcm::App.find_by_name("Taxi Tapp GCM")
           notification.registration_ids = [regid]
@@ -50,9 +48,7 @@ class UserTaxiCallsController < ApplicationController
           }
 
           notification.save!
-          puts "Before push"
           Rpush.push
-          puts "After push"
         end
 
         format.html { redirect_to @user_taxi_call, notice: 'User taxi call was successfully created.' }
