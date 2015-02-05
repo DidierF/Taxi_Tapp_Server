@@ -58,7 +58,9 @@ class UserTaxiCallsController < ApplicationController
           notification.data = {
             message: client_user.get_full_name + " is looking for a cab!",
             call_id: @user_taxi_call.id,
-            user_id: @user_taxi_call.user_id
+            user_id: @user_taxi_call.user_id,
+            latitude: @user_taxi_call.latitude,
+            longitude: @user_taxi_call.longitude
           }
 
           notification.save!
