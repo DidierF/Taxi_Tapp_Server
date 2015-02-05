@@ -14,7 +14,7 @@ class UserTaxiCall < ActiveRecord::Base
 	end
 
 	before_save do
-		if !self.accepted.nil? && self.accepted
+		if !self[:accepted].nil? && self[:accepted]
 			self.pending = false
 		end
 		true
