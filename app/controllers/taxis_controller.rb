@@ -13,6 +13,7 @@ class TaxisController < ApplicationController
   # GET /taxis/1
   # GET /taxis/1.json
   def show
+    @taxis = Taxi.where(omw_to: params[:id]).to_a
   end
 
   # GET /taxis/new

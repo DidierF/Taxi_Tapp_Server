@@ -5,6 +5,7 @@ class CreateUserTaxiCalls < ActiveRecord::Migration
 	    t.integer :taxi_id
 	    t.boolean :direct_call
 	    t.boolean :pending
+      t.boolean :accepted
 	    
 
       	t.timestamps null: false

@@ -11,7 +11,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150129060527) do
+ActiveRecord::Schema.define(version: 20150205094244) do
+
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
 
   create_table "rpush_apps", force: :cascade do |t|
     t.string   "name",                                null: false
@@ -37,7 +40,7 @@ ActiveRecord::Schema.define(version: 20150129060527) do
     t.integer  "app_id"
   end
 
-  add_index "rpush_feedback", ["device_token"], name: "index_rpush_feedback_on_device_token"
+  add_index "rpush_feedback", ["device_token"], name: "index_rpush_feedback_on_device_token", using: :btree
 
   create_table "rpush_notifications", force: :cascade do |t|
     t.integer  "badge"
@@ -70,8 +73,7 @@ ActiveRecord::Schema.define(version: 20150129060527) do
     t.string   "category"
   end
 
-  add_index "rpush_notifications", ["app_id", "delivered", "failed", "deliver_after"], name: "index_rapns_notifications_multi"
-  add_index "rpush_notifications", ["delivered", "failed"], name: "index_rpush_notifications_multi", where: "NOT delivered AND NOT failed"
+  add_index "rpush_notifications", ["delivered", "failed"], name: "index_rpush_notifications_multi", where: "((NOT delivered) AND (NOT failed))", using: :btree
 
   create_table "taxis", force: :cascade do |t|
     t.string   "name"
@@ -81,6 +83,7 @@ ActiveRecord::Schema.define(version: 20150129060527) do
     t.datetime "updated_at", null: false
     t.boolean  "available"
     t.integer  "user_id"
+    t.integer  "omw_to"
   end
 
   create_table "user_taxi_calls", force: :cascade do |t|
@@ -88,6 +91,7 @@ ActiveRecord::Schema.define(version: 20150129060527) do
     t.integer  "taxi_id"
     t.boolean  "direct_call"
     t.boolean  "pending"
+    t.boolean  "accepted"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
     t.float    "latitude"

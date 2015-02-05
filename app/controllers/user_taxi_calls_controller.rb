@@ -34,17 +34,31 @@ class UserTaxiCallsController < ApplicationController
     respond_to do |format|
       if previous_call.nil? && @user_taxi_call.save!
         notification = Rpush::Gcm::Notification.new
-        taxi_user = Taxi.find(call_params[:taxi_id]).user
-        client_user = User.find(call_params[:user_id])
-        regid = taxi_user.registration_id
+        regid = []
 
-        if !regid.nil?
+        client_user = User.find(call_params[:user_id])
+
+        if @user_taxi_call.direct_call
+          taxi_user = Taxi.find(call_params[:taxi_id]).user
+          regid = [taxi_user.registration_id]
+        else
+          taxi_users = client_user.nearbys(6.21371)
+          regid = []
+          taxi_users.to_a.each do |u|
+            if !u.registration_id.nil? && !u.taxi.nil?
+              regid.push u.registration_id
+            end
+          end
+        end
+
+        if !regid.nil? && !regid.empty?
           notification.app = Rpush::Gcm::App.find_by_name("Taxi Tapp GCM")
-          notification.registration_ids = [regid]
+          notification.registration_ids = regid
 
           notification.data = {
             message: client_user.get_full_name + " is looking for a cab!",
-            call_id: @user_taxi_call.id
+            call_id: @user_taxi_call.id,
+            user_id: @user_taxi_call.user_id
           }
 
           notification.save!
@@ -64,27 +78,29 @@ class UserTaxiCallsController < ApplicationController
   # PATCH/PUT /user_taxi_calls/1.json
   def update
     respond_to do |format|
-      if @user_taxi_call.update(user_taxi_call_params)
+      call_params = user_taxi_call_params
 
-        if !@user_taxi_call.pending
+      if @user_taxi_call.pending && call_params[:accepted] && @user_taxi_call.update(call_params)
           notification = Rpush::Gcm::Notification.new
-          taxi_user = Taxi.find(@user_taxi_call.taxi_id).user
+          taxi = Taxi.find(@user_taxi_call.taxi_id)
+          taxi_user = taxi.user
           client_user = User.find(@user_taxi_call.user_id)
           regid = client_user.registration_id
-
+          taxi.omw_to = client_user.id
+          taxi_user.save!
           if !regid.nil?
             notification.app = Rpush::Gcm::App.find_by_name("Taxi Tapp GCM")
             notification.registration_ids = [regid]
 
             notification.data = {
-              message: taxi_user.get_full_name + " is on the way to pick you up!",
-              call_id: @user_taxi_call.id
+              message: taxi_user.get_full_name + " is on the way to pick you up!\nRequest ID: " + @user_taxi_call.id.to_s,
+              call_id: @user_taxi_call.id,
+              accepted: true
             }
 
             notification.save!
             Rpush.push
           end
-        end
 
         format.html { redirect_to @user_taxi_call, notice: 'User taxi call was successfully updated.' }
         format.json { render :show, status: :ok, location: @user_taxi_call }
@@ -114,13 +130,8 @@ class UserTaxiCallsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def user_taxi_call_params
       call_params = params.require(:user_taxi_call)[0] || params.require(:user_taxi_call)
-      puts "test"
-      puts call_params
-
       call_params = call_params.each { |k, v| call_params[k] = v[0] }
 
-      puts call_params
-
-      call_params.permit(:user_id, :taxi_id, :latitude, :longitude)
+      call_params.permit(:user_id, :taxi_id, :latitude, :longitude, :accepted, :pending)
     end
 end

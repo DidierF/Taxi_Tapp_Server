@@ -3,6 +3,7 @@ class User < ActiveRecord::Base
 	has_one :taxi
 
 	after_update :update_taxi
+	reverse_geocoded_by :latitude, :longitude
 
 	def getFullName
 		self.first_name + ' ' + self.last_name
@@ -20,11 +21,12 @@ class User < ActiveRecord::Base
 	private
 	def update_taxi
 		if(!self.taxi.nil?)
-			taxi = self.taxi
-			taxi.latitude = self.latitude
-			taxi.longitude = self.longitude
-			taxi.name = self.getFullName
-			taxi.save
+			t = self.taxi
+			t.latitude = self.latitude
+			t.longitude = self.longitude
+			t.name = self.getFullName
+			t.save
 		end
+		true
 	end
 end
